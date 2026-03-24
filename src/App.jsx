@@ -112,10 +112,34 @@ function App() {
   const cursorRef = useRef(null)
   const glowRef = useRef(null)
   const containerRef = useRef(null)
+  const [isMobileView, setIsMobileView] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(pointer: coarse)').matches
+  })
   const [theme, setTheme] = useState(() => {
     if (typeof window === 'undefined') return 'midnight'
     return localStorage.getItem('portfolio-theme') || 'midnight'
   })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const mobileQuery = window.matchMedia('(max-width: 768px)')
+    const coarseQuery = window.matchMedia('(pointer: coarse)')
+
+    const updateMobileState = () => {
+      setIsMobileView(mobileQuery.matches || coarseQuery.matches)
+    }
+
+    updateMobileState()
+    mobileQuery.addEventListener('change', updateMobileState)
+    coarseQuery.addEventListener('change', updateMobileState)
+
+    return () => {
+      mobileQuery.removeEventListener('change', updateMobileState)
+      coarseQuery.removeEventListener('change', updateMobileState)
+    }
+  }, [])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -164,20 +188,22 @@ function App() {
       )
     })
 
-    const parallaxNodes = gsap.utils.toArray('[data-parallax]')
-    parallaxNodes.forEach((node) => {
-      const level = Number(node.getAttribute('data-parallax') || 1)
-      gsap.to(node, {
-        yPercent: -10 * level,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: node,
-          scrub: true,
-          start: 'top bottom',
-          end: 'bottom top',
-        },
+    if (!isMobileView) {
+      const parallaxNodes = gsap.utils.toArray('[data-parallax]')
+      parallaxNodes.forEach((node) => {
+        const level = Number(node.getAttribute('data-parallax') || 1)
+        gsap.to(node, {
+          yPercent: -10 * level,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: node,
+            scrub: true,
+            start: 'top bottom',
+            end: 'bottom top',
+          },
+        })
       })
-    })
+    }
 
     gsap.fromTo(
       '.hero-line',
@@ -194,9 +220,11 @@ function App() {
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
     }
-  }, [])
+  }, [isMobileView])
 
   useEffect(() => {
+    if (isMobileView) return
+
     const cursor = cursorRef.current
     const glow = glowRef.current
 
@@ -251,17 +279,17 @@ function App() {
       window.removeEventListener('mouseenter', show)
       window.removeEventListener('mouseleave', hide)
     }
-  }, [])
+  }, [isMobileView])
 
   return (
     <div ref={containerRef} className="relative overflow-x-clip">
-      <div ref={cursorRef} className="custom-cursor" />
-      <div ref={glowRef} className="custom-cursor-glow" />
+      {!isMobileView && <div ref={cursorRef} className="custom-cursor" />}
+      {!isMobileView && <div ref={glowRef} className="custom-cursor-glow" />}
 
       <div className="pointer-events-none absolute inset-0 -z-10 bg-noise opacity-30" />
 
       <section id="home" className="relative mx-auto min-h-screen max-w-7xl px-4 pb-20 pt-10 md:px-8">
-        <nav className="glass relative z-30 flex items-center justify-between rounded-full px-5 py-3" data-reveal>
+        <nav className="portfolio-nav glass relative z-30 flex items-center justify-between rounded-full px-5 py-3" data-reveal>
           <span className="text-sm uppercase tracking-[0.32em] text-zinc-300">Nimesh Nirmal</span>
           <div className="nav-links flex items-center gap-4 text-sm text-zinc-400">
             <a href="#home" className="hover:text-white transition-colors">Home</a>
@@ -286,10 +314,10 @@ function App() {
           <div className="hero-orb hero-orb-left" data-parallax="1.2" />
           <div className="hero-orb hero-orb-right" data-parallax="1.6" />
 
-          <h1 className="hero-line max-w-4xl text-4xl font-semibold leading-tight text-white md:text-6xl" data-stagger-item>
+          <h1 className="hero-line max-w-4xl text-3xl font-semibold leading-tight text-white sm:text-4xl md:text-6xl" data-stagger-item>
             I build scalable full-stack products and premium frontend experiences.
           </h1>
-          <p className="hero-line mt-6 max-w-2xl text-base text-zinc-300 md:text-lg" data-stagger-item>
+          <p className="hero-line mt-6 max-w-2xl text-sm text-zinc-300 sm:text-base md:text-lg" data-stagger-item>
             Computer Engineering student at Gautam Buddha University with hands-on MERN internship experience, focused on clean architecture, responsive interfaces, and real-world product delivery.
           </p>
           <div className="hero-line mt-4" data-stagger-item>
@@ -297,7 +325,7 @@ function App() {
               Open to internships and full-time software engineering opportunities
             </p>
           </div>
-          <div className="hero-line mt-10 flex flex-wrap items-center gap-4" data-stagger-item>
+          <div className="hero-line mt-8 flex flex-wrap items-center gap-3 sm:mt-10 sm:gap-4" data-stagger-item>
             <a href="#contact" className="btn-primary">Let&apos;s Collaborate</a>
             <a href="#work" className="btn-secondary">View Projects</a>
           </div>

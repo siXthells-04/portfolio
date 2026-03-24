@@ -7,11 +7,14 @@ import App from './App.jsx'
 
 gsap.registerPlugin(ScrollTrigger)
 
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
+
 const lenis = new Lenis({
-  duration: 1.2,
-  smoothWheel: true,
+  duration: isTouchDevice ? 0.9 : 1.2,
+  smoothWheel: !isTouchDevice,
+  syncTouch: isTouchDevice,
   wheelMultiplier: 0.9,
-  touchMultiplier: 1.5,
+  touchMultiplier: isTouchDevice ? 1 : 1.5,
   infinite: false,
 })
 
@@ -35,6 +38,13 @@ const onAnchorClick = (event) => {
   if (!target) return
 
   event.preventDefault()
+
+  if (isTouchDevice) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    history.replaceState(null, '', href)
+    return
+  }
+
   lenis.scrollTo(target, {
     duration: 1.2,
     easing: (value) => 1 - Math.pow(1 - value, 3),

@@ -50,7 +50,12 @@ body[data-theme='aurora'] {
 
 * {
   box-sizing: border-box;
-  cursor: none;
+}
+
+@media (pointer: fine) {
+  * {
+    cursor: none;
+  }
 }
 
 html,
@@ -204,6 +209,10 @@ body[data-theme='aurora'] .border-white\/20 {
 .nav-links {
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.portfolio-nav {
+  gap: 0.8rem;
 }
 
 .hero-rail-wrap {
@@ -433,7 +442,75 @@ body[data-theme='aurora'] .border-white\/20 {
     display: none;
   }
 
-  * {
-    cursor: auto;
+  .portfolio-nav {
+    border-radius: 1rem;
+    padding: 0.75rem 0.9rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .portfolio-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .theme-switch {
+    min-height: 2.1rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+  }
+
+  .glass-card,
+  .project-card {
+    border-radius: 1rem;
+    padding: 1.1rem;
+  }
+
+  .hero-rail-wrap {
+    padding: 0.62rem 0;
+  }
+
+  .hero-rail-item,
+  .skill-rail-item {
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+  }
+
+  .open-to-work-pill {
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 0.74rem;
+  }
+
+  .open-to-work-inline {
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    padding: 0.72rem 1.05rem;
+  }
+
+  .hero-orb-left {
+    width: 10rem;
+    height: 10rem;
+    top: -1.5rem;
+    left: -3rem;
+  }
+
+  .hero-orb-right {
+    width: 12rem;
+    height: 12rem;
+    top: -2.2rem;
+    right: -3.2rem;
   }
 }
