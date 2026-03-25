@@ -780,6 +780,16 @@ function App() {
           </div>
         </div>
       </footer>
+
+      <div className="bottom-info-bar hidden md:flex" aria-label="Bottom footer bar">
+        <p className="text-sm text-zinc-300">© 2026 Nimesh Nirmal · MERN Stack Developer</p>
+        <div className="bottom-info-links text-sm text-zinc-400">
+          <a href="#home" className="hover:text-white transition-colors">Home</a>
+          <a href="#work" className="hover:text-white transition-colors">Projects</a>
+          <a href="https://www.linkedin.com/in/nimeshnirmal" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+          <a href="mailto:nirmalnimesh123@gmai.com" className="hover:text-white transition-colors">Email</a>
+        </div>
+      </div>
     </div>
   )
 }
