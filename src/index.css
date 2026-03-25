@@ -856,10 +856,19 @@ body[data-theme='aurora'] .open-to-work-inline::before {
   }
 
   .landing-nav-pill {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
     width: 100%;
-    justify-content: space-between;
+    max-width: 100%;
     gap: 0.25rem;
     padding: 0.2rem;
+    overflow: hidden;
+  }
+
+  .landing-nav-pill.nav-links {
+    flex-wrap: nowrap;
+    justify-content: initial;
   }
 
   .landing-nav-links {
@@ -867,6 +876,8 @@ body[data-theme='aurora'] .open-to-work-inline::before {
     align-items: center;
     gap: 0.22rem;
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
@@ -882,6 +893,27 @@ body[data-theme='aurora'] .open-to-work-inline::before {
     min-height: 2.05rem;
     padding-inline: 0.62rem;
     font-size: 0.58rem;
+    margin-left: 0.12rem;
+  }
+
+  body[data-theme='aurora'] .landing-nav-pill {
+    border-color: rgba(127, 29, 29, 0.24);
+    background: rgba(255, 247, 237, 0.94);
+  }
+
+  body[data-theme='aurora'] .landing-nav-pill a {
+    color: rgba(74, 16, 37, 0.9);
+  }
+
+  body[data-theme='aurora'] .landing-nav-pill a.is-active {
+    background: #7f1d1d;
+    color: #fff7ed;
+  }
+
+  body[data-theme='aurora'] .landing-nav-pill .theme-switch {
+    color: #4a1025;
+    border-color: rgba(127, 29, 29, 0.22);
+    background: rgba(255, 255, 255, 0.68);
   }
 
   .landing-edge-meta {
