@@ -74,11 +74,70 @@ const skills = [
   'VS Code',
 ]
 
+const techStackRail = [
+  {
+    name: 'HTML5',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
+  },
+  {
+    name: 'CSS3',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg',
+  },
+  {
+    name: 'JavaScript',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+  },
+  {
+    name: 'React',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+  },
+  {
+    name: 'Node.js',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+  },
+  {
+    name: 'Express',
+    logo: 'https://cdn.simpleicons.org/express/ffffff',
+  },
+  {
+    name: 'MongoDB',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg',
+  },
+  {
+    name: 'MySQL',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
+  },
+  {
+    name: 'PostgreSQL',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
+  },
+  {
+    name: 'Tailwind CSS',
+    logo: 'https://cdn.simpleicons.org/tailwindcss/06B6D4',
+  },
+  {
+    name: 'Python',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+  },
+  {
+    name: 'C++',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg',
+  },
+  {
+    name: 'GitHub',
+    logo: 'https://cdn.simpleicons.org/github/ffffff',
+  },
+  {
+    name: 'VS Code',
+    logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg',
+  },
+]
+
 const impactStats = [
   { label: 'Internship Experience', value: '4 Months' },
   { label: 'Core Projects', value: '3+' },
   { label: 'Tech Stack', value: 'MERN + APIs' },
-  { label: 'Location', value: 'Greater Noida' },
+  { label: 'Location', value: 'New Delhi' },
 ]
 
 const achievements = [
@@ -99,19 +158,16 @@ const achievements = [
   },
 ]
 
-const headlineRail = [
-  'MERN STACK DEVELOPER',
-  'FULL-STACK ENGINEERING',
-  'RESPONSIVE UI SYSTEMS',
-  'REST API INTEGRATIONS',
-  'PROBLEM SOLVING',
-  'CLEAN CODE ARCHITECTURE',
-]
-
 function App() {
   const cursorRef = useRef(null)
   const glowRef = useRef(null)
   const containerRef = useRef(null)
+  const audioContextRef = useRef(null)
+  const lastHoverTargetRef = useRef(null)
+  const scrollProgressFillRef = useRef(null)
+  const scrollProgressDotRef = useRef(null)
+  const navLinksRef = useRef(null)
+  const navItemRefs = useRef({})
   const [isMobileView, setIsMobileView] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(pointer: coarse)').matches
@@ -120,6 +176,22 @@ function App() {
     if (typeof window === 'undefined') return 'midnight'
     return localStorage.getItem('portfolio-theme') || 'midnight'
   })
+  const [activeNav, setActiveNav] = useState('home')
+  const [navIndicator, setNavIndicator] = useState({ left: 0, width: 0, ready: false })
+
+  const navItems = [
+    { id: 'home', label: 'Home' },
+    { id: 'about', label: 'About' },
+    { id: 'experience', label: 'Experience' },
+    { id: 'skills', label: 'Skills' },
+    { id: 'work', label: 'Work' },
+    { id: 'achievements', label: 'Achievements' },
+    { id: 'contact', label: 'Contact' },
+  ]
+
+  const handleNavClick = (targetId) => {
+    setActiveNav(targetId)
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -148,7 +220,62 @@ function App() {
   }, [theme])
 
   useEffect(() => {
+    const updateNavIndicator = () => {
+      const navContainer = navLinksRef.current
+      const activeItem = navItemRefs.current[activeNav]
+      if (!navContainer || !activeItem) return
+
+      const navRect = navContainer.getBoundingClientRect()
+      const itemRect = activeItem.getBoundingClientRect()
+
+      setNavIndicator({
+        left: itemRect.left - navRect.left,
+        width: itemRect.width,
+        ready: true,
+      })
+    }
+
+    updateNavIndicator()
+    window.addEventListener('resize', updateNavIndicator)
+
+    return () => {
+      window.removeEventListener('resize', updateNavIndicator)
+    }
+  }, [activeNav])
+
+  useEffect(() => {
+    const trackedSections = ['home', 'about', 'experience', 'skills', 'work', 'achievements', 'contact']
+    const sectionNodes = trackedSections
+      .map((id) => document.getElementById(id))
+      .filter(Boolean)
+
+    if (!sectionNodes.length) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const mostVisible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((first, second) => second.intersectionRatio - first.intersectionRatio)[0]
+
+        if (mostVisible?.target?.id) {
+          setActiveNav(mostVisible.target.id)
+        }
+      },
+      {
+        threshold: [0.25, 0.5, 0.75],
+        rootMargin: '-15% 0px -35% 0px',
+      },
+    )
+
+    sectionNodes.forEach((section) => observer.observe(section))
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
+
+    let progressTrigger = null
 
     const revealItems = gsap.utils.toArray('[data-reveal]')
     revealItems.forEach((item) => {
@@ -217,7 +344,30 @@ function App() {
       },
     )
 
+    const progressFill = scrollProgressFillRef.current
+    const progressDot = scrollProgressDotRef.current
+
+    if (progressFill && progressDot) {
+      gsap.set(progressFill, { transformOrigin: 'top center', scaleY: 0 })
+
+      progressTrigger = ScrollTrigger.create({
+        trigger: document.documentElement,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: true,
+        onUpdate: (self) => {
+          const progress = self.progress
+          gsap.set(progressFill, { scaleY: progress })
+
+          const trackHeight = progressFill.parentElement?.clientHeight || 0
+          const dotOffset = Math.max(trackHeight - 12, 0)
+          gsap.set(progressDot, { y: progress * dotOffset })
+        },
+      })
+    }
+
     return () => {
+      progressTrigger?.kill()
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
     }
   }, [isMobileView])
@@ -281,66 +431,164 @@ function App() {
     }
   }, [isMobileView])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (window.matchMedia('(pointer: coarse)').matches) return
+
+    const getAudioContext = () => {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext
+      if (!AudioContextClass) return null
+
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContextClass()
+      }
+
+      if (audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().catch(() => {})
+      }
+
+      return audioContextRef.current
+    }
+
+    const playTick = () => {
+      const audioContext = getAudioContext()
+      if (!audioContext) return
+
+      const now = audioContext.currentTime
+      const oscillator = audioContext.createOscillator()
+      const gain = audioContext.createGain()
+
+      oscillator.type = 'square'
+      oscillator.frequency.setValueAtTime(1800, now)
+      oscillator.frequency.exponentialRampToValueAtTime(900, now + 0.03)
+
+      gain.gain.setValueAtTime(0.0001, now)
+      gain.gain.exponentialRampToValueAtTime(0.05, now + 0.004)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05)
+
+      oscillator.connect(gain)
+      gain.connect(audioContext.destination)
+
+      oscillator.start(now)
+      oscillator.stop(now + 0.052)
+    }
+
+    const unlockAudio = () => {
+      getAudioContext()
+      window.removeEventListener('pointerdown', unlockAudio, true)
+      window.removeEventListener('keydown', unlockAudio, true)
+    }
+
+    const hoverSoundSelector = [
+      '.tech-stack-item',
+      '.tech-stack-mark',
+      'a',
+      'button',
+      '[role="button"]',
+      'input[type="button"]',
+      'input[type="submit"]',
+      'input[type="checkbox"]',
+      'input[type="radio"]',
+      'summary',
+      '[data-clickable="true"]',
+    ].join(', ')
+
+    const onMouseOver = (event) => {
+      if (!(event.target instanceof Element)) return
+
+      const targetElement = event.target.closest(hoverSoundSelector)
+      if (!targetElement) {
+        lastHoverTargetRef.current = null
+        return
+      }
+
+      if (targetElement.matches(':disabled, [aria-disabled="true"]')) return
+      if (lastHoverTargetRef.current === targetElement) return
+
+      lastHoverTargetRef.current = targetElement
+      playTick()
+    }
+
+    window.addEventListener('pointerdown', unlockAudio, true)
+    window.addEventListener('keydown', unlockAudio, true)
+    window.addEventListener('mouseover', onMouseOver, true)
+
+    return () => {
+      window.removeEventListener('pointerdown', unlockAudio, true)
+      window.removeEventListener('keydown', unlockAudio, true)
+      window.removeEventListener('mouseover', onMouseOver, true)
+    }
+  }, [])
+
   return (
     <div ref={containerRef} className="relative overflow-x-clip">
       {!isMobileView && <div ref={cursorRef} className="custom-cursor" />}
       {!isMobileView && <div ref={glowRef} className="custom-cursor-glow" />}
+      <div className="scroll-progress" aria-hidden="true">
+        <div ref={scrollProgressFillRef} className="scroll-progress-fill" />
+        <span ref={scrollProgressDotRef} className="scroll-progress-dot" />
+      </div>
 
       <div className="pointer-events-none absolute inset-0 -z-10 bg-noise opacity-30" />
 
-      <section id="home" className="relative mx-auto min-h-screen max-w-7xl px-4 pb-20 pt-10 md:px-8">
-        <nav className="portfolio-nav glass relative z-30 flex items-center justify-between rounded-full px-5 py-3" data-reveal>
-          <span className="text-sm uppercase tracking-[0.32em] text-zinc-300">Nimesh Nirmal</span>
-          <div className="nav-links flex items-center gap-4 text-sm text-zinc-400">
-            <a href="#home" className="hover:text-white transition-colors">Home</a>
-            <a href="#about" className="hover:text-white transition-colors">About</a>
-            <a href="#experience" className="hover:text-white transition-colors">Experience</a>
-            <a href="#skills" className="hover:text-white transition-colors">Skills</a>
-            <a href="#work" className="hover:text-white transition-colors">Projects</a>
-            <a href="#achievements" className="hover:text-white transition-colors">Achievements</a>
-            <a href="#contact" className="hover:text-white transition-colors">Contact</a>
+      <section id="home" className="landing-home section-shell section-scatter relative w-full min-h-screen pb-14 pt-6 md:pb-20 md:pt-8">
+        <nav className="landing-nav" data-reveal>
+          <div className="landing-brand">
+            <span className="landing-brand-mark">NN</span>
+            <div className="landing-brand-copy">
+              <p>Creative Full Stack Dev</p>
+              <p>Building the Future</p>
+            </div>
+          </div>
+
+          <div className="landing-nav-pill nav-links">
+            <div ref={navLinksRef} className="landing-nav-links">
+              <span
+                className={`landing-nav-indicator ${navIndicator.ready ? 'is-ready' : ''}`}
+                style={{ left: `${navIndicator.left}px`, width: `${navIndicator.width}px` }}
+              />
+              {navItems.map((item) => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  ref={(element) => {
+                    if (element) navItemRefs.current[item.id] = element
+                  }}
+                  className={activeNav === item.id ? 'is-active' : ''}
+                  onClick={() => handleNavClick(item.id)}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
             <button
               type="button"
               className="theme-switch"
               onClick={() => setTheme((prev) => (prev === 'midnight' ? 'aurora' : 'midnight'))}
               aria-label="Toggle website theme"
             >
-              {theme === 'midnight' ? 'Aurora Theme' : 'Midnight Theme'}
+              {theme === 'midnight' ? 'Light' : 'Dark'}
             </button>
           </div>
         </nav>
 
-        <div className="relative mt-20" data-stagger>
-          <div className="hero-orb hero-orb-left" data-parallax="1.2" />
-          <div className="hero-orb hero-orb-right" data-parallax="1.6" />
-
-          <h1 className="hero-line max-w-4xl text-3xl font-semibold leading-tight text-white sm:text-4xl md:text-6xl" data-stagger-item>
-            I build scalable full-stack products and premium frontend experiences.
-          </h1>
-          <p className="hero-line mt-6 max-w-2xl text-sm text-zinc-300 sm:text-base md:text-lg" data-stagger-item>
-            Computer Engineering student at Gautam Buddha University with hands-on MERN internship experience, focused on clean architecture, responsive interfaces, and real-world product delivery.
-          </p>
-          <div className="hero-line mt-4" data-stagger-item>
-            <p className="open-to-work-pill">
-              Open to internships and full-time software engineering opportunities
-            </p>
-          </div>
-          <div className="hero-line mt-8 flex flex-wrap items-center gap-3 sm:mt-10 sm:gap-4" data-stagger-item>
-            <a href="#contact" className="btn-primary">Let&apos;s Collaborate</a>
-            <a href="#work" className="btn-secondary">View Projects</a>
-          </div>
+        <div className="landing-center" data-stagger>
+          <h1 className="hero-line landing-title" data-stagger-item data-nav-focus>NIMESH</h1>
+          <p className="hero-line landing-kicker" data-stagger-item data-nav-focus>I design and build products that</p>
+          <p className="hero-line landing-impact" data-stagger-item>deliver real impact.</p>
         </div>
 
-        <div className="hero-rail-wrap mt-14" data-reveal>
-          <div className="hero-rail-track">
-            {[...headlineRail, ...headlineRail].map((item, index) => (
-              <span key={`${item}-${index}`} className="hero-rail-item">✦ {item}</span>
-            ))}
+        <div className="landing-edge-meta" data-reveal>
+          <div className="landing-meta-block">
+            <p className="landing-meta-label">Based In New Delhi, India</p>
+          </div>
+          <div className="landing-meta-block right">
+            <p className="landing-meta-label">Full Stack Dev & Designer</p>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-6 md:px-8" data-stagger>
+      <section className="section-shell section-scatter w-full py-6" data-stagger>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {impactStats.map((stat) => (
             <article key={stat.label} className="glass-card py-6" data-stagger-item>
@@ -351,27 +599,29 @@ function App() {
         </div>
       </section>
 
-      <section id="about" className="mx-auto max-w-7xl px-4 py-20 md:px-8" data-reveal>
-        <div className="glass rounded-3xl p-8 md:p-12">
+      <section id="about" className="section-shell section-scatter w-full py-20" data-reveal>
+        <div className="glass rounded-3xl p-6 md:p-10">
           <p className="mb-5 text-sm uppercase tracking-[0.3em] text-zinc-400">About</p>
-          <h2 className="max-w-3xl text-3xl font-medium text-white md:text-5xl">
-            Passionate MERN Stack Developer focused on scalable and user-friendly web applications.
-          </h2>
-          <div className="mt-6 max-w-3xl space-y-4 text-zinc-300">
-            <p>
-              I am a Full Stack Developer with hands-on experience in building scalable and user-friendly web applications using MongoDB, Express.js, React.js, and Node.js.
-            </p>
-            <p>
-              I enjoy working across both frontend and backend, creating responsive interfaces and developing efficient APIs. I have a strong foundation in JavaScript and modern development practices, and I am always eager to learn and adapt to new technologies.
-            </p>
-            <p>
-              I am particularly interested in opportunities where I can contribute to meaningful, real-world projects while continuing to grow as a developer. I value clean code, problem-solving, and collaboration, and I am confident I can add value to any team.
-            </p>
+          <div className="grid gap-8 md:grid-cols-12 md:gap-12">
+            <h2 data-nav-focus className="md:col-span-7 text-4xl font-medium leading-tight text-white md:text-6xl">
+              Passionate MERN Stack Developer building scalable, user-focused digital products.
+            </h2>
+            <div className="md:col-span-5 space-y-6 text-base leading-relaxed text-zinc-300 sm:text-lg md:text-xl">
+              <p>
+                I am a Full Stack Developer with hands-on experience building scalable web applications using MongoDB, Express.js, React.js, and Node.js.
+              </p>
+              <p>
+                I enjoy working across both frontend and backend—crafting responsive interfaces, building efficient APIs, and shipping features with clean architecture.
+              </p>
+              <p>
+                I am focused on meaningful, real-world products where I can keep growing, collaborate with strong teams, and deliver reliable engineering impact.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="experience" className="mx-auto max-w-7xl px-4 py-10 md:px-8" data-stagger>
+      <section id="experience" className="section-shell section-scatter w-full py-10" data-stagger>
         <p className="mb-8 text-sm uppercase tracking-[0.3em] text-zinc-400" data-stagger-item>
           Experience
         </p>
@@ -394,7 +644,7 @@ function App() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 md:px-8" data-stagger>
+      <section className="section-shell section-scatter w-full py-10" data-stagger>
         <p className="mb-8 text-sm uppercase tracking-[0.3em] text-zinc-400" data-stagger-item>
           Core Strengths
         </p>
@@ -408,7 +658,7 @@ function App() {
         </div>
       </section>
 
-      <section id="skills" className="mx-auto max-w-7xl px-4 py-10 md:px-8" data-stagger>
+      <section id="skills" className="section-shell section-scatter w-full py-10" data-stagger>
         <p className="mb-8 text-sm uppercase tracking-[0.3em] text-zinc-400" data-stagger-item>
           Technical Skills
         </p>
@@ -417,7 +667,7 @@ function App() {
             {skills.map((skill) => (
               <span
                 key={skill}
-                className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-zinc-200"
+                className="text-sm text-zinc-200"
               >
                 {skill}
               </span>
@@ -426,23 +676,27 @@ function App() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-6 md:px-8" data-reveal>
-        <div className="skill-rail-wrap glass rounded-full px-4 py-3">
-          <div className="skill-rail-track" aria-label="Animated skills rail">
-            {[...skills, ...skills].map((skill, index) => (
-              <span key={`${skill}-${index}`} className="skill-rail-item">
-                {skill}
-              </span>
+      <section className="section-shell section-scatter w-full py-6" data-reveal>
+        <div className="tech-stack-rail px-4 py-6 md:px-8 md:py-7">
+          <h3 className="tech-stack-title">Tech Stack</h3>
+          <div className="tech-stack-track" aria-label="Animated tech stack rail">
+            {[...techStackRail, ...techStackRail].map((item, index) => (
+              <div key={`${item.name}-${index}`} className="tech-stack-item">
+                <span className="tech-stack-mark">
+                  <img src={item.logo} alt={`${item.name} logo`} loading="lazy" className="tech-stack-logo" />
+                </span>
+                <span className="tech-stack-name">{item.name}</span>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="work" className="mx-auto max-w-7xl px-4 py-24 md:px-8" data-stagger>
+      <section id="work" className="section-shell section-scatter w-full py-24" data-stagger>
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6" data-stagger-item>
           <div>
             <p className="mb-4 text-sm uppercase tracking-[0.3em] text-zinc-400">Selected Work</p>
-            <h2 className="text-3xl font-medium text-white md:text-5xl">Projects with depth, speed, and character.</h2>
+            <h2 data-nav-focus className="text-3xl font-medium text-white md:text-5xl">Projects with depth, speed, and character.</h2>
           </div>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -457,7 +711,7 @@ function App() {
         </div>
       </section>
 
-      <section id="achievements" className="mx-auto max-w-7xl px-4 py-12 md:px-8" data-stagger>
+      <section id="achievements" className="section-shell section-scatter w-full py-12" data-stagger>
         <div className="mb-10" data-stagger-item>
           <p className="mb-4 text-sm uppercase tracking-[0.3em] text-zinc-400">Recognition & Growth</p>
           <h2 className="text-3xl font-medium text-white md:text-5xl">Proof of execution, ownership, and consistency.</h2>
@@ -473,16 +727,25 @@ function App() {
         </div>
       </section>
 
-      <section id="contact" className="mx-auto max-w-7xl px-4 pb-28 pt-10 md:px-8" data-reveal>
-        <div className="glass rounded-3xl p-8 md:flex md:items-end md:justify-between md:p-12">
-          <div>
+      <section id="contact" className="section-shell section-scatter w-full pb-28 pt-10" data-reveal>
+        <div className="glass rounded-3xl p-6 md:p-10">
+          <div className="grid gap-10 md:grid-cols-12 md:gap-14">
+            <div className="md:col-span-7">
             <p className="mb-4 text-sm uppercase tracking-[0.3em] text-zinc-400">Contact</p>
-            <h2 className="max-w-2xl text-3xl font-medium text-white md:text-5xl">
+            <h2 data-nav-focus className="text-4xl font-medium leading-tight text-white md:text-6xl">
               Let’s build impactful digital products together.
             </h2>
-            <div className="mt-5 space-y-1 text-zinc-300">
+            <div className="mt-8 grid gap-4 text-zinc-300 sm:grid-cols-2 md:gap-6">
               <p className="open-to-work-inline">Open to internships and full-time roles</p>
-              <p>Email: nirmalnimesh123@gmail.com</p>
+              <p>
+                Email:{' '}
+                <a
+                  href="mailto:nirmalnimesh123@gmail.com"
+                  className="text-indigo-300 hover:text-indigo-200"
+                >
+                  nirmalnimesh123@gmail.com
+                </a>
+              </p>
               <p>Phone: +91 96507 79182</p>
               <p>
                 LinkedIn:{' '}
@@ -497,13 +760,16 @@ function App() {
               </p>
             </div>
           </div>
-          <a className="btn-primary mt-8 inline-flex md:mt-0" href="mailto:nirmalnimesh123@gmai.com">
-            Start a Project
-          </a>
+            <div className="md:col-span-5 md:flex md:items-end md:justify-end">
+              <a className="btn-primary contact-cta inline-flex" href="mailto:nirmalnimesh123@gmai.com">
+                Start a Project
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
-      <footer className="mx-auto max-w-7xl px-4 pb-16 md:px-8" data-reveal>
+      <footer className="section-shell section-scatter w-full pb-16" data-reveal>
         <div className="glass flex flex-wrap items-center justify-between gap-4 rounded-2xl px-6 py-5">
           <p className="text-sm text-zinc-300">© 2026 Nimesh Nirmal · MERN Stack Developer</p>
           <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-400">
